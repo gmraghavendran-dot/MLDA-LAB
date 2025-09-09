@@ -1,0 +1,31 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression
+
+# Load dataset
+data = pd.read_csv("Yulu.csv")
+
+# Feature (Temperature) and Target (Ride count)
+X = data[['temp']]
+Y = data[['count']]
+
+# Train Linear Regression Model
+model = LinearRegression()
+model.fit(X, Y)
+
+# Predictions
+y_pred = model.predict(X)
+
+print("Slope (m):", model.coef_[0][0])
+print("Intercept (c):", model.intercept_[0])
+
+# Plot the actual data points
+plt.scatter(X, Y, color='blue', label='Actual Data')
+# Plot regression line
+plt.plot(X, y_pred, color='red', label='Regression Line')
+
+plt.xlabel("Temperature (°C)")
+plt.ylabel("Ride Count")
+plt.title("Simple Linear Regression: Temp vs Ride Count")
+plt.legend()
+plt.show()
