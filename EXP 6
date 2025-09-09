@@ -1,0 +1,31 @@
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error, r2_score
+
+# Load dataset
+data = pd.read_csv("Yulu.csv")
+
+# Features
+X = data[["season", "holiday", "workingday", "weather",
+          "temp", "atemp", "humidity", "windspeed"]]
+
+# Target (ride count is continuous → regression)
+y = data["count"]
+
+# Train-test split
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=2
+)
+
+# Linear Regression
+lr = LinearRegression()
+lr.fit(X_train, y_train)
+y_lr_pred = lr.predict(X_test)
+
+# Evaluation
+mse = mean_squared_error(y_test, y_lr_pred)
+r2 = r2_score(y_test, y_lr_pred)
+
+print("MSE:", mse)
+print("R2 Score:", r2)
