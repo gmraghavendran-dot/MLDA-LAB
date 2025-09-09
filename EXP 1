@@ -1,0 +1,80 @@
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.impute import SimpleImputer
+
+# Load dataset
+data = pd.read_csv("Yulu.csv")
+
+# -------------------------
+# 1. Data Cleaning & Feature Engineering
+# -------------------------
+# Convert datetime column to datetime type
+data["datetime"] = pd.to_datetime(data["datetime"])
+
+# Extract useful datetime features
+data["year"] = data["datetime"].dt.year
+data["month"] = data["datetime"].dt.month
+data["day"] = data["datetime"].dt.day
+data["hour"] = data["datetime"].dt.hour
+data["weekday"] = data["datetime"].dt.weekday
+
+# Drop original datetime column (already expanded)
+data = data.drop(columns=["datetime"])
+
+# -------------------------
+# 2. Define Features and Target
+# -------------------------
+# Exclude 'casual' and 'registered' (they leak info about target)
+X = data.drop(columns=["casual", "registered", "count"])
+y = data["count"]
+
+# Identify numerical and categorical features
+num_features = ["temp", "atemp", "humidity", "windspeed", "year", "month", "day", "hour", "weekday"]
+cat_features = ["season", "holiday", "workingday", "weather"]
+
+# -------------------------
+# 3. Preprocessing Pipelines
+# -------------------------
+num_transformer = Pipeline(steps=[
+    ("imputer", SimpleImputer(strategy="mean")),
+    ("scaler", StandardScaler())
+])
+
+cat_transformer = Pipeline(steps=[
+    ("imputer", SimpleImputer(strategy="most_frequent")),
+    ("onehot", OneHotEncoder(handle_unknown="ignore", sparse_output=False))
+])
+
+# Combine preprocessing steps
+preprocessor = ColumnTransformer(
+    transformers=[
+        ("num", num_transformer, num_features),
+        ("cat", cat_transformer, cat_features)
+    ]
+)
+
+preprocessor.set_output(transform="pandas")
+
+# -------------------------
+# 4. Apply Transformations
+# -------------------------
+X_preprocessed = preprocessor.fit_transform(X)
+
+# -------------------------
+# 5. Train-Test Split
+# -------------------------
+X_train, X_test, y_train, y_test = train_test_split(
+    X_preprocessed, y, test_size=0.2, random_state=42
+)
+
+# -------------------------
+# 6. Display Results
+# -------------------------
+print("Processed Features Sample:")
+print(X_train.head())
+print("\nTarget Sample:")
+print(y_train.head())
