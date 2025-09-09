@@ -1,0 +1,29 @@
+import pandas as pd
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import KFold, cross_val_score
+
+# Load dataset
+data = pd.read_csv("Yulu.csv")
+
+# Features (example: using temp, humidity, windspeed)
+X = data[['temp', 'humidity', 'windspeed']]
+# Target (ride count)
+y = data['count']
+
+# Define models
+reg1 = DecisionTreeRegressor(random_state=42)
+reg2 = LinearRegression()
+
+# 10-fold cross validation
+k_folds = KFold(n_splits=10, shuffle=True, random_state=42)
+
+scores1 = cross_val_score(reg1, X, y, cv=k_folds, scoring='r2')
+scores2 = cross_val_score(reg2, X, y, cv=k_folds, scoring='r2')
+
+print("Cross Validation Scores (Decision Tree):", scores1)
+print("Cross Validation Scores (Linear Regression):", scores2)
+print("Average CV Score (Decision Tree):", scores1.mean())
+print("Average CV Score (Linear Regression):", scores2.mean())
+print("Number of CV Scores used in Average (Decision Tree):", len(scores1))
+print("Number of CV Scores used in Average (Linear Regression):", len(scores2))
